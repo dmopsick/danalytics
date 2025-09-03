@@ -5,6 +5,7 @@ from tcg_probability_calculator  import TcgProbabilityCalculator
 app = Flask(__name__)
 api = Api(app)
 
+tcg_probability_calculator = TcgProbabilityCalculator()
 
 class OpeningHandProbabilityAPI(Resource):
   """
@@ -13,14 +14,10 @@ class OpeningHandProbabilityAPI(Resource):
   def get(self):
     copies = request.args.get('copies', type=int)
 
-    print("Flag 1 " + str(copies))
-
-    calc = TcgProbabilityCalculator()
-
-    probability = calc.opening_hand_probability(copies)
-
     if copies is None:
       return jsonify({"ERROR: Missing required parameters"}, 400)
+
+    probability = tcg_probability_calculator.opening_hand_probability(copies)
     
     return jsonify({
       "copies" : copies,
@@ -32,8 +29,19 @@ class PrizeProbability(Resource):
   Calculate the likehlihood a card is prized
   """
   def get(self):
-    return {'message' : 'Test Dan'}
+    copies = request.args.get('copies', type=int)
+
+    if copies is None:
+      return jsonify({"ERROR: Missing required parameters"}, 400)
+
+    probability= tcg_probability_calculator.prizing_probability(copies)
+
+    return jsonify({
+      "copies" : copies,
+      "probability" : probability
+    })
   
+# Add the APIs we built to our Flask app
 api.add_resource(PrizeProbability, '/prize')
 api.add_resource(OpeningHandProbabilityAPI, '/opening-hand')
 
